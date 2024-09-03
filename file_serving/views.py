@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import FileResponse, StreamingHttpResponse, HttpResponse
 from django.conf import settings
 import os
-import re
+from wsgiref.util import FileWrapper
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ def serve_file(request, filename):
     response = FileResponse(open(filepath, 'rb'), as_attachment=True)
     response['Content-Length'] = str(file_size)
     response['Content-Type'] = 'application/octet-stream'
+    response["Content-Disposition"] = f"attachment; filename={filename}"
 
     return response
 
@@ -48,37 +49,10 @@ def serve_file_stream(request, filename):
         response['Content-Type'] = 'application/octet-stream'
         return response
 
-    range_header = request.headers.get('Range', '').strip()
-    logger.debug(f"Range header: {range_header}")
-    range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
+    chunk_size = 8192
 
-    if range_match:
-        first_byte, last_byte = range_match.groups()
-        logger.debug(f"First byte: {first_byte}; Last byte: {last_byte}")
-        first_byte = int(first_byte) if first_byte else 0
-        last_byte = int(last_byte) if last_byte else file_size - 1
-
-        chunk_size = 8192
-        length = last_byte - first_byte + 1
-
-        def stream_file():
-            with open(filepath, 'rb') as f:
-                f.seek(first_byte)
-                while first_byte <= last_byte:
-                    bytes_to_read = min(chunk_size, last_byte - first_byte + 1)
-                    data = f.read(bytes_to_read)
-                    if not data:
-                        break
-                    yield data
-                    first_byte += bytes_to_read
-
-        response = StreamingHttpResponse(stream_file(), status=206, content_type='application/octet-stream')
-        response['Content-Length'] = str(length)
-        response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{file_size}'
-    else:
-        file_size = os.path.getsize(filepath)
-        response = FileResponse(open(filepath, 'rb'), as_attachment=True)
-        response['Content-Length'] = str(file_size)
-        response['Content-Type'] = 'application/octet-stream'
+    response = StreamingHttpResponse(FileWrapper(open(filepath, 'rb'), chunk_size), content_type='application/octet-stream')
+    response['Content-Length'] = str(file_size)
+    response["Content-Disposition"] = f"attachment; filename={filename}"
 
     return response
