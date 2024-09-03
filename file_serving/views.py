@@ -3,6 +3,7 @@ from django.http import FileResponse
 from django.http import StreamingHttpResponse, HttpResponse
 from django.conf import settings
 import os
+import re
 
 def serve_file(request, filename):
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
