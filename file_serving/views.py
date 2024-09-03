@@ -23,7 +23,11 @@ def serve_file(request, filename):
         response['Content-Type'] = 'application/octet-stream'
         return response
 
-    return FileResponse(open(filepath, 'rb'), as_attachment=True)
+    response = FileResponse(open(filepath, 'rb'), as_attachment=True)
+    response['Content-Length'] = str(file_size)
+    response['Content-Type'] = 'application/octet-stream'
+
+    return response
 
 def serve_file_stream(request, filename):
     logger.debug(f"Streaming file: {filename}")
@@ -46,6 +50,7 @@ def serve_file_stream(request, filename):
 
     if range_match:
         first_byte, last_byte = range_match.groups()
+        logger.debug(f"First byte: {first_byte}; Last byte: {last_byte}")
         first_byte = int(first_byte) if first_byte else 0
         last_byte = int(last_byte) if last_byte else file_size - 1
 
@@ -67,6 +72,9 @@ def serve_file_stream(request, filename):
         response['Content-Length'] = str(length)
         response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{file_size}'
     else:
+        file_size = os.path.getsize(filepath)
         response = FileResponse(open(filepath, 'rb'), as_attachment=True)
+        response['Content-Length'] = str(file_size)
+        response['Content-Type'] = 'application/octet-stream'
 
     return response
