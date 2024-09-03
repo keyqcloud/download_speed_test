@@ -21,5 +21,5 @@ from file_serving import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('files/', include('file_serving.urls')),
-    path('/', views.index, name='index'),
+    path('', views.index, name='index'),
 ]
