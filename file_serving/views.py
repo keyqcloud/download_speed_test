@@ -7,6 +7,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+def index(request):
+    return HttpResponse('Hello, world!')
+
 def serve_file(request, filename):
     logger.debug(f"Serving file: {filename}")
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
