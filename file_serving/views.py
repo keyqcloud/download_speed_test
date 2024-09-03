@@ -7,12 +7,38 @@ import re
 
 def serve_file(request, filename):
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
+    
+    if not os.path.exists(filepath):
+        return HttpResponse(status=404)
+
+    file_size = os.path.getsize(filepath)
+
+    # Handle HEAD requests
+    if request.method == 'HEAD':
+        response = HttpResponse()
+        response['Content-Length'] = str(file_size)
+        response['Content-Type'] = 'application/octet-stream'
+        return response
+
+    # Handle GET requests
     return FileResponse(open(filepath, 'rb'), as_attachment=True)
 
 def serve_file_stream(request, filename):
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
 
+    if not os.path.exists(filepath):
+        return HttpResponse(status=404)
+
     file_size = os.path.getsize(filepath)
+    
+    # Handle HEAD requests
+    if request.method == 'HEAD':
+        response = HttpResponse()
+        response['Content-Length'] = str(file_size)
+        response['Content-Type'] = 'application/octet-stream'
+        return response
+
+    # Handle GET requests
     range_header = request.headers.get('Range', '').strip()
     range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
 
