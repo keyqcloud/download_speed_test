@@ -132,7 +132,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/home/ec2-user/django_debug.log',
+            'filename': '~/django_debug.log',
         },
     },
     'loggers': {
