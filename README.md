@@ -17,6 +17,16 @@ This Django application serves static files of various sizes and supports multip
 - Nginx (for serving static files and proxying to Gunicorn)
 - Puppeteer (for testing download speeds)
 
+## Create dummy static files
+
+```
+mkdir -p static/files
+dd if=/dev/random of=static/files/100MB.bin bs=1M count=100
+dd if=/dev/random of=static/files/250MB.bin bs=1M count=250
+dd if=/dev/random of=static/files/500MB.bin bs=1M count=500
+dd if=/dev/random of=static/files/1GB.bin bs=1M count=1000
+```
+
 ## Configure Ngnix
 
 Setup a self-signed certificate
