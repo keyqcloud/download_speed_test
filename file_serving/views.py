@@ -49,6 +49,7 @@ def serve_file_stream(request, filename):
         return response
 
     range_header = request.headers.get('Range', '').strip()
+    logger.debug(f"Range header: {range_header}")
     range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
 
     if range_match:
