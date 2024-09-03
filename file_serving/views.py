@@ -1,44 +1,41 @@
-from django.shortcuts import render
-from django.http import FileResponse
-from django.http import StreamingHttpResponse, HttpResponse
-from django.conf import settings
-import os
-import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 def serve_file(request, filename):
+    logger.debug(f"Serving file: {filename}")
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
     
     if not os.path.exists(filepath):
+        logger.error(f"File not found: {filepath}")
         return HttpResponse(status=404)
 
     file_size = os.path.getsize(filepath)
 
-    # Handle HEAD requests
     if request.method == 'HEAD':
         response = HttpResponse()
         response['Content-Length'] = str(file_size)
         response['Content-Type'] = 'application/octet-stream'
         return response
 
-    # Handle GET requests
     return FileResponse(open(filepath, 'rb'), as_attachment=True)
 
 def serve_file_stream(request, filename):
+    logger.debug(f"Streaming file: {filename}")
     filepath = os.path.join(settings.STATICFILES_DIRS[0], 'files', filename)
 
     if not os.path.exists(filepath):
+        logger.error(f"File not found: {filepath}")
         return HttpResponse(status=404)
 
     file_size = os.path.getsize(filepath)
-    
-    # Handle HEAD requests
+
     if request.method == 'HEAD':
         response = HttpResponse()
         response['Content-Length'] = str(file_size)
         response['Content-Type'] = 'application/octet-stream'
         return response
 
-    # Handle GET requests
     range_header = request.headers.get('Range', '').strip()
     range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
 
@@ -47,7 +44,7 @@ def serve_file_stream(request, filename):
         first_byte = int(first_byte) if first_byte else 0
         last_byte = int(last_byte) if last_byte else file_size - 1
 
-        chunk_size = 8192  # 8KB chunks
+        chunk_size = 8192
         length = last_byte - first_byte + 1
 
         def stream_file():
