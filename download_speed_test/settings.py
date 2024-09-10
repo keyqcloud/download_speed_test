@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ikpk*yzu!x2qi38m=76*43pcst8aq_b!v6an6a-gfdmfnk=ni$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['aim-download-test.stratis-troika.com', '13.59.58.254', 'localhost', '127.0.0.1', '10.0.20.79']
+ALLOWED_HOSTS = ['aim-download-test.stratis-troika.com', '3.142.51.202', 'localhost', '127.0.0.1', '10.0.20.79']
 
 
 # Application definition
